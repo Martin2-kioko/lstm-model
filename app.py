@@ -12,8 +12,8 @@ data = pd.read_csv("MVS.csv", parse_dates=['Date'])
 data.set_index('Date', inplace=True)
 
 # Load models & scalers
-model_m = load_model("lstm_model_mastercard.h5",compile=False)
-model_v = load_model("lstm_model_visa.h5",compile=False)
+model_m = load_model("lstm_model_mastercard.h5", compile=False)
+model_v = load_model("lstm_model_visa.h5", compile=False)
 
 scaler_m = joblib.load("scaler_mastercard.pkl")
 scaler_v = joblib.load("scaler_visa.pkl")
@@ -79,8 +79,8 @@ elif page == "📈 Predict Prices":
     X_idx = np.arange(len(features)).reshape(-1, 1)
     detrended = features[close_col].values - trend_model.predict(X_idx)
 
-    # Scale
-    scaled_features = scaler.transform(features)
+    # 🔧 FIX: Convert to numpy array to avoid feature name errors
+    scaled_features = scaler.transform(features.values)
     scaled_detrended = scaler_detrended.transform(detrended.reshape(-1, 1))
 
     # Sequence
