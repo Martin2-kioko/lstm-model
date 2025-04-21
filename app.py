@@ -12,8 +12,8 @@ data = pd.read_csv("MVS.csv", parse_dates=['Date'])
 data.set_index('Date', inplace=True)
 
 # Load models & scalers
-model_m = load_model("lstm_model_mastercard.h5")
-model_v = load_model("lstm_model_visa.h5")
+model_m = load_model("lstm_model_mastercard.h5",compile=False)
+model_v = load_model("lstm_model_visa.h5",compile=False)
 
 scaler_m = joblib.load("scaler_mastercard.pkl")
 scaler_v = joblib.load("scaler_visa.pkl")
