@@ -101,34 +101,35 @@ elif page == "📈 Predictions":
         predicted_prices = predicted_detrended.flatten() + trend
         actual_prices = features[close_col].iloc[seq_length:]
 
-        return actual_prices, predicted_prices
+        return actual_prices, predicted_prices, features.index[seq_length:]
 
-    st.subheader("Compare Mastercard and Visa")
-    actual_m, predicted_m = prepare_prediction_data("Mastercard")
-    actual_v, predicted_v = prepare_prediction_data("Visa")
+    for stock in ["Mastercard", "Visa"]:
+        actual, predicted, index = prepare_prediction_data(stock)
+        st.subheader(f"{stock} Price Forecast")
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=index, y=actual.values[-len(predicted):], mode='lines', name=f"{stock} Actual"))
+        fig.add_trace(go.Scatter(x=index, y=predicted, mode='lines', name=f"{stock} Predicted"))
+        fig.update_layout(title=f"{stock}: Historical & Forecasted Prices", xaxis_title="Date", yaxis_title="Price")
+        st.plotly_chart(fig, use_container_width=True)
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=actual_m.index[-len(predicted_m):], y=actual_m.values[-len(predicted_m):],
-                             mode='lines', name='Mastercard Actual'))
-    fig.add_trace(go.Scatter(x=actual_m.index[-len(predicted_m):], y=predicted_m,
-                             mode='lines', name='Mastercard Predicted'))
-    fig.add_trace(go.Scatter(x=actual_v.index[-len(predicted_v):], y=actual_v.values[-len(predicted_v):],
-                             mode='lines', name='Visa Actual'))
-    fig.add_trace(go.Scatter(x=actual_v.index[-len(predicted_v):], y=predicted_v,
-                             mode='lines', name='Visa Predicted'))
-    fig.update_layout(title="Mastercard vs Visa: Historical & Predicted Prices",
-                      xaxis_title="Date", yaxis_title="Price")
-    st.plotly_chart(fig, use_container_width=True)
+    # Compare and advise
+    actual_m, predicted_m, _ = prepare_prediction_data("Mastercard")
+    actual_v, predicted_v, _ = prepare_prediction_data("Visa")
 
-    # Suggestion
-    if predicted_m[-1] > actual_m.values[-1] and predicted_v[-1] > actual_v.values[-1]:
-        suggestion = "Both Mastercard and Visa show an upward trend. Consider investing in either, depending on diversification needs."
-    elif predicted_m[-1] > actual_m.values[-1]:
-        suggestion = "Mastercard shows a strong upward trend. It may be a good investment opportunity."
-    elif predicted_v[-1] > actual_v.values[-1]:
-        suggestion = "Visa is trending upward. It may be worth considering for investment."
+    last_pred_m = predicted_m[-1]
+    last_actual_m = actual_m.values[-1]
+    last_pred_v = predicted_v[-1]
+    last_actual_v = actual_v.values[-1]
+
+    suggestion = ""
+    if last_pred_m > last_actual_m and last_pred_v > last_actual_v:
+        suggestion = "Both Mastercard and Visa show an upward trend. Consider investing in either or both based on diversification goals."
+    elif last_pred_m > last_actual_m:
+        suggestion = "Mastercard's forecast suggests higher profitability. It may be a better buy right now."
+    elif last_pred_v > last_actual_v:
+        suggestion = "Visa's forecast is more promising than Mastercard's. Consider investing in Visa."
     else:
-        suggestion = "Both stocks show a downward or flat trend. Monitor further before investing."
+        suggestion = "Neither stock shows a clear upward trend. Consider waiting for a better opportunity or investing cautiously."
 
     st.success(f"💡 Investment Suggestion: {suggestion}")
 
